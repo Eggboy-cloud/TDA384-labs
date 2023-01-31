@@ -15,14 +15,16 @@ public class Lab1 {
     down_left.add(6,9);
     down_left.add(5,11);
     down_left.add(6,10);
-    down_left.add(1,10);
+    //down_left.add(1,10);
     Critical down_middle = new Critical(1);
+    down_middle.add(1,10);
+    down_middle.add(19,8);
     Critical down_right = new Critical(2);
     down_right.add(13,9);
     down_right.add(15,7);
     down_right.add(13,10);
     down_right.add(15,8);
-    down_right.add(19,8);
+    //down_right.add(19,8);
     Critical down = new Critical(3);
     down.add(10,11);
     down.add(10,13);
@@ -30,7 +32,7 @@ public class Lab1 {
     Critical cross = new Critical(5);
     cross.add(8,5);             // sensor up
     cross.add(6,7);             // sensor left
-    cross.add(10,7);            // sensor right
+    cross.add(11,7);            // sensor right
     cross.add(10,8);             // sensor down
     Critical up = new Critical(6);
     up.add(10,3);
@@ -41,8 +43,6 @@ public class Lab1 {
     sections.add(down_right);   // section 2
     sections.add(down);         // section 3
     sections.add(up_middle);    // section 4
-
-
     sections.add(cross);        // section 5
     sections.add(up);           // section 6
     
@@ -177,11 +177,11 @@ public void setSwitch(int x, int y, int dir) {
       t.setSpeed(0);
       switch(c.id) {
         case(0): t.changeSection(c); section_zero(t,index); break; 
+        case(1): t.changeSection(c); section_one(t,index);  break;
         case(2): t.changeSection(c); section_two(t,index);  break;
         case(3): t.changeSection(c); reverse_train(t);      break;
-        case(5): t.changeSection(c); //TODO cross-section;
-        break;
-        case(6): t.changeSection(c); reverse_train(t); break;
+        case(5): t.changeSection(c); section_cross(t,index);break;
+        case(6): t.changeSection(c); reverse_train(t);      break;
 
       }
 
@@ -206,32 +206,33 @@ public void setSwitch(int x, int y, int dir) {
       int switch1_y = 11;
       int switch2_x = 4;
       int switch2_y = 9;
-      if(sensor != 4 && this.acquired){
+      if(this.acquired){
         this.current.release();
         this.acquired = false;
     }
-    else {
+    else if(!this.acquired){
         this.acquired = true;
     }
 
       switch(sensor){
-        case(0): 
-          setSwitch(switch1_x, switch1_y,tsi.SWITCH_RIGHT);         this.dir=true;  break;
-        case(2): 
-          setSwitch(switch1_x, switch1_y, tsi.SWITCH_LEFT);         this.dir=true;  break;
-        case(1): setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);   this.dir=false; break;
+        case(0): setSwitch(switch1_x, switch1_y, tsi.SWITCH_RIGHT);  this.dir=true;  break;
+        case(1): setSwitch(switch2_x, switch2_y, tsi.SWITCH_LEFT);   this.dir=false; break;
+        case(2): setSwitch(switch1_x, switch1_y, tsi.SWITCH_LEFT);  this.dir=true;  break;
         case(3): setSwitch(switch2_x, switch2_y, tsi.SWITCH_RIGHT); this.dir=false; break;
-        case(4): 
+        /*case(4): {
           if(this.rail!=null) {
             this.rail.release();
+            System.out.print("released rail");
           }
           if(this.dir) {
             if(sections.get(1).tryAcquire()){
+              System.out.print("acquired from down");
               this.rail = sections.get(1);
               setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);
             }
-            else
-            setSwitch(switch2_x, switch2_y,tsi.SWITCH_RIGHT);
+            else {
+              setSwitch(switch2_x, switch2_y,tsi.SWITCH_RIGHT);
+            }
           }
           else{
             if(sections.get(3).tryAcquire()){
@@ -242,9 +243,75 @@ public void setSwitch(int x, int y, int dir) {
               setSwitch(switch2_x, switch2_y,tsi.SWITCH_RIGHT);
             }
           }
-
+        }*/
       }
       t.setSpeed(t.speed);
+    }
+
+    public void section_one (Train t, int Sensor){
+      int switch1_x = 3;
+      int switch1_y = 11;
+      int switch2_x = 4;
+      int switch2_y = 9;
+      int switch3_x = 15;
+      int switch3_y = 9;
+      int switch4_x = 17;
+      int switch4_y = 7;
+      
+      if(this.rail!=null) {
+        this.rail.release();
+      }
+      System.out.print("Se här>>" + Sensor + "<<!!");
+      switch(Sensor){
+        case(0):
+          if(this.dir) {
+            if(sections.get(1).tryAcquire()){
+              this.rail = sections.get(1);
+              setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);
+            }
+            else {
+              System.out.print("I TOO, AM STOOPID ");
+              setSwitch(switch2_x, switch2_y,tsi.SWITCH_RIGHT);
+            }
+          }
+          else {
+            if(sections.get(3).tryAcquire()){
+              this.rail = sections.get(3);
+              setSwitch(switch1_x, switch1_y,tsi.SWITCH_LEFT);
+            }
+            else {
+              System.out.print("HERE ASWELL ");
+              setSwitch(switch1_x, switch1_y,tsi.SWITCH_RIGHT);
+            }
+          }
+          this.setSpeed(this.speed);
+          break;
+        case(1):
+          if(this.rail != null) {
+            this.rail.release();
+          }
+          if(this.dir) {
+            if(sections.get(1).tryAcquire()){
+              System.out.print("acquired from szone 2");
+              this.rail = sections.get(1);
+              setSwitch(switch3_x, switch3_y,tsi.SWITCH_RIGHT);
+            }
+            else
+            System.out.print("I CHOOSE YOU ");
+            setSwitch(switch3_x, switch3_y,tsi.SWITCH_LEFT);
+          }
+          else{
+            if(sections.get(4).tryAcquire()){
+              this.rail = sections.get(4);
+              setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
+            }
+            else {
+              setSwitch(switch4_x, switch4_y,tsi.SWITCH_LEFT);
+            }
+          }
+          this.setSpeed(this.speed);
+          break;
+      }
     }
 
     public void section_two (Train t, int sensor){
@@ -258,21 +325,23 @@ public void setSwitch(int x, int y, int dir) {
           this.current.release();
           this.acquired = false;
       }
-      else {
+      else if(sensor !=4 && !this.acquired){
           this.acquired = true;
       }
       
       switch(sensor){
         case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT); this.dir=false; break;
-        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT); this.dir=true;break;
+        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT); this.dir=true;  break;
         case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);  this.dir=false; break;
-        case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);  this.dir=true; break;
-        case(4): 
-          if(this.rail!=null) {
+        case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);  this.dir=true;  break;
+        /*case(4): {
+          if(this.rail != null) {
             this.rail.release();
+            System.out.print("releaset rael");
           }
-          if(!this.dir) {
+          if(this.dir) {
             if(sections.get(1).tryAcquire()){
+              System.out.print("acquired from szone 2");
               this.rail = sections.get(1);
               setSwitch(switch3_x, switch3_y,tsi.SWITCH_RIGHT);
             }
@@ -288,17 +357,22 @@ public void setSwitch(int x, int y, int dir) {
               setSwitch(switch4_x, switch4_y,tsi.SWITCH_LEFT);
             }
           }
-          
+        }*/
       }
       t.setSpeed(t.speed);
-     
     }
+
+    void section_cross(Train t, int sensor){
+       this.setSpeed(t.speed); 
+    }
+
     void reverse_train(Train t){
       try { 
+          System.out.print(t.dir);
           if(!this.dir){
-            this.setSpeed(0); 
-            Thread.sleep(1000+(20*t.speed));
-            this.setSpeed(-t.speed);
+            t.setSpeed(0); 
+            Thread.sleep(1+(2*t.speed));
+            t.setSpeed(-t.speed);
           }
           else{
             this.setSpeed(speed);
