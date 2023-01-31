@@ -232,9 +232,10 @@ public void setSwitch(int x, int y, int dir) {
         }
         t.isAcquired = true;
       }
-      else
+      else {
         section.release();
         t.isAcquired = false;
+      }
       switch(sensor){
         case(0): 
         setSwitch(switch1_x, switch1_y, tsi.SWITCH_RIGHT);   
@@ -277,42 +278,20 @@ public void setSwitch(int x, int y, int dir) {
           }
           t.isAcquired = true;
         }
-        else {
-          section.release();
-          t.isAcquired = false;
+      }
+      }
+    }
+      else {
+        section.release();
+        t.isAcquired = false;
         }
-
-        }
-        }
+        
+        
       switch(sensor){
         case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT);  break;
         case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT);  break;
         case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);   break;
         case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);   break;
-        /*case(4): {
-          if(this.rail != null) {
-            this.rail.release();
-            System.out.print("releaset rael");
-          }
-          if(this.dir) {
-            if(sections.get(1).tryAcquire()){
-              System.out.print("acquired from szone 2");
-              this.rail = sections.get(1);
-              setSwitch(switch3_x, switch3_y,tsi.SWITCH_RIGHT);
-            }
-            else
-            setSwitch(switch3_x, switch3_y,tsi.SWITCH_LEFT);
-          }
-          else{
-            if(sections.get(4).tryAcquire()){
-              this.rail = sections.get(4);
-              setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
-            }
-            else {
-              setSwitch(switch4_x, switch4_y,tsi.SWITCH_LEFT);
-            }
-          }
-        }*/
       }
       t.setSpeed(t.speed);
     }
