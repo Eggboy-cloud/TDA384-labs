@@ -191,37 +191,29 @@ public void setSwitch(int x, int y, int dir) {
       int switch1_y = 11;
       int switch2_x = 4;
       int switch2_y = 9;
-      switch(sensor){
-        case(0): setSwitch(switch1_x, switch1_y,tsi.SWITCH_LEFT);
-        
-        case(2): setSwitch(switch1_x, switch1_y, tsi.SWITCH_RIGHT);
-        
-          if(!t.isAcquired) {
+
+      if(!t.isAcquired && (sensor == 0 || sensor == 2)) {
             if(sections.get(1).tryAcquire())
               setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);
             else 
               setSwitch(switch2_x, switch2_y, tsi.SWITCH_RIGHT);
             t.isAcquired = true;
           }
-          else {
-            t.isAcquired = false;
-          }
-          return; 
-        case(1):
-          setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);
-        case(3):
-        setSwitch(switch2_x, switch2_y, tsi.SWITCH_RIGHT);
-          if(!t.isAcquired) {
+      else if(!t.isAcquired && (sensor == 1 || sensor == 3)) {
             if(sections.get(3).tryAcquire())
               setSwitch(switch1_x, switch1_y, tsi.SWITCH_LEFT);
             else
               setSwitch(switch1_x, switch1_y,tsi.SWITCH_RIGHT);
             t.isAcquired = true;
           }
-              else {
+      else {
             t.isAcquired = false;
           }
-          return;
+      switch(sensor){
+        case(0): setSwitch(switch1_x, switch1_y,tsi.SWITCH_LEFT);   break;
+        case(2): setSwitch(switch1_x, switch1_y, tsi.SWITCH_RIGHT); break;
+        case(1): setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);   break;
+        case(3): setSwitch(switch2_x, switch2_y, tsi.SWITCH_RIGHT); break;
       }
     }
 
@@ -230,34 +222,29 @@ public void setSwitch(int x, int y, int dir) {
       int switch3_y = 9;
       int switch4_x = 17;
       int switch4_y = 7;
-      switch(sensor){
-        case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT);
-        case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);
-          if(!t.isAcquired) {
-            if(sections.get(1).tryAcquire())
+      if(!t.isAcquired && (sensor == 1 || sensor == 3)) {
+            if(sections.get(4).tryAcquire())
               setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
             else 
               setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);
             t.isAcquired = true;
           }
-          else {
-            t.isAcquired = false;
-          }
-          return; 
-        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT);
-        case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);
-          if(!t.isAcquired) {
+      else if(!t.isAcquired && (sensor == 2 || sensor == 0)) {
             if(sections.get(1).tryAcquire())
               setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT);
             else
               setSwitch(switch3_x, switch3_y,tsi.SWITCH_LEFT);
             t.isAcquired = true;
           }
-              else {
-            t.isAcquired = false;
-          }
-          return;
-    }
+      else {
+        t.isAcquired = false;
+      }
+      switch(sensor){
+        case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT); break;
+        case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);  break;
+        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT); break;
+        case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);  break;
+      }
     }
     public void run(){
       while(true){
