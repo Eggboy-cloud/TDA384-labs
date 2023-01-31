@@ -1,14 +1,15 @@
 import TSim.*;
 import java.util.ArrayList;
 import java.util.concurrent.*;
-import java.util.function.ToDoubleBiFunction;
 
 public class Lab1 {
   ArrayList<Critical> sections = new ArrayList(); 
   TSimInterface tsi = TSimInterface.getInstance();
+  
 
 
   public Lab1(int speed1, int speed2) {
+    tsi.setDebug(true);
     Critical down_left = new Critical(0);
     down_left.add(3,12);
     down_left.add(5,9);
@@ -164,7 +165,7 @@ public void setSwitch(int x, int y, int dir) {
       t.setSpeed(0);
       switch(c.id) {
         case(0): t.changeSection(c); section_zero(t,index); break; 
-        case(2): t.changeSection(c); section_two(t,index); break;
+        case(2): t.changeSection(c); setSwitch(17, 7,tsi.SWITCH_RIGHT);//section_two(t,index); break;
         case(3): t.changeSection(c); //TODO reverse train
         break;
         case(5): t.changeSection(c); //TODO cross-section;
@@ -224,19 +225,19 @@ public void setSwitch(int x, int y, int dir) {
       int switch4_x = 17;
       int switch4_y = 7;
       if(!t.isAcquired && (sensor == 1 || sensor == 3)) {
-            if(sections.get(4).tryAcquire())
-              setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
-            else 
-              setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);
-            t.isAcquired = true;
-          }
-      else if(!t.isAcquired && (sensor == 2 || sensor == 0)) {
-            if(sections.get(1).tryAcquire())
+        if(sections.get(1).tryAcquire())
               setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT);
-            else
+        else
               setSwitch(switch3_x, switch3_y,tsi.SWITCH_LEFT);
-            t.isAcquired = true;
-          }
+        t.isAcquired = true;
+      }           
+      else if(!t.isAcquired && (sensor == 2 || sensor == 0)) {
+        if(sections.get(4).tryAcquire())
+              setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
+        else 
+              setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);
+        t.isAcquired = true;
+      }
       else {
         t.isAcquired = false;
       }
