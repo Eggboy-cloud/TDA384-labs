@@ -17,8 +17,6 @@ public class Lab1 {
     down_left.add(6,10);
     //down_left.add(1,10);
     Critical down_middle = new Critical(1);
-    down_middle.add(1,10);
-    down_middle.add(19,8);
     Critical down_right = new Critical(2);
     down_right.add(13,9);
     down_right.add(15,7);
@@ -248,39 +246,41 @@ public void setSwitch(int x, int y, int dir) {
     }
 
     public void section_two (Train t, int sensor){
-      System.out.println("In method");
+      System.out.println("Trying to catch");
       int switch3_x = 15;
       int switch3_y = 9;
       int switch4_x = 17;
       int switch4_y = 7;
-      Critical section = sections.get(1);
+      Critical section = sections.get(2);
       System.out.println(sensor);
       if(!t.isAcquired) {
-        changeSection(section);
-        if(sensor == 0) {
-          sections.get(1).release();
-        if(sensor == 0 || sensor == 2) {
-          if(sections.get(4).tryAcquire()) {
-            setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT);
+          changeSection(section);
+          if(sensor == 0) {
+            sections.get(1).release();
           }
-          else {
-            setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);
+          if(sensor == 0 || sensor == 2) {
+            if(sections.get(4).tryAcquire()) {
+              setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT);
+            }
+            else {
+              setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);
+            }
+          if(sensor == 1) {
+            sections.get(4).release();
           }
-        if(sensor == 1) {
-          sections.get(4).release();
+          if(sensor == 1 || sensor == 3) {
+            if(sections.get(1).tryAcquire()){
+              setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT);
+            }
+            else {
+              setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);
+            }
+            t.isAcquired = true;
+          }
         }
-        if(sensor == 1 || sensor == 3) {
-          if(sections.get(4).tryAcquire()){
-            setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT);
-          }
-          else {
-            setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);
-          }
-          t.isAcquired = true;
-        }
+          
       }
-      }
-    }
+    
       else {
         section.release();
         t.isAcquired = false;
