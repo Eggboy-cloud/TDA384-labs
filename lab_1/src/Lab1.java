@@ -11,18 +11,18 @@ public class Lab1 {
   public Lab1(int speed1, int speed2) {
     tsi.setDebug(true);
     Critical down_left = new Critical(0);
-    down_left.add(3,12);
-    down_left.add(5,9);
-    down_left.add(4,11);
-    down_left.add(5,10);
+    down_left.add(3,13);
+    down_left.add(6,9);
+    down_left.add(5,11);
+    down_left.add(6,10);
     down_left.add(1,10);
     Critical down_middle = new Critical(1);
     Critical down_right = new Critical(2);
-    down_right.add(14,9);
-    down_right.add(16,7);
-    down_right.add(14,10);
-    down_right.add(16,8);
-    doqn_left.add(19,8);
+    down_right.add(13,9);
+    down_right.add(15,7);
+    down_right.add(13,10);
+    down_right.add(15,8);
+    down_right.add(19,8);
     Critical down = new Critical(3);
     down.add(10,11);
     down.add(10,13);
@@ -31,7 +31,7 @@ public class Lab1 {
     cross.add(8,5);             // sensor up
     cross.add(6,7);             // sensor left
     cross.add(10,7);            // sensor right
-    cross.add(9,8);             // sensor down
+    cross.add(10,8);             // sensor down
     Critical up = new Critical(6);
     up.add(10,3);
     up.add(10,5);
@@ -136,7 +136,7 @@ public void setSwitch(int x, int y, int dir) {
     }
 
   private class Train implements Runnable{
-    
+    boolean acquired = false;
     private final int id;
     private final int speed;
     private SensorEvent sensor;
@@ -144,7 +144,7 @@ public void setSwitch(int x, int y, int dir) {
     private Critical rail;
     //swtiches 15 9 right to zero cluster
     // switches 17 7 last before 4-crossing
-    private boolean dir = false;
+    private boolean dir = true;
 
     public Train(int id, int speed){
       this.id = id;
@@ -178,22 +178,21 @@ public void setSwitch(int x, int y, int dir) {
       switch(c.id) {
         case(0): t.changeSection(c); section_zero(t,index); break; 
         case(2): t.changeSection(c); section_two(t,index);  break;
-        case(3): t.changeSection(c); //TODO reverse train
-        break;
+        case(3): t.changeSection(c); reverse_train(t);      break;
         case(5): t.changeSection(c); //TODO cross-section;
         break;
-        case(6): t.changeSection(c); //TODO reverse-train 
+        case(6): t.changeSection(c); reverse_train(t); break;
 
       }
 
-      t.setSpeed(t.speed);
+      
     }
 
     public void changeSection(Critical c) {
       try {
-        c.acquire(); 
         if(this.current !=null)
-          this.current.release(); 
+            this.current.release(); 
+        c.acquire(); 
         this.current = c;
       }
       catch (InterruptedException e) {
@@ -207,8 +206,14 @@ public void setSwitch(int x, int y, int dir) {
       int switch1_y = 11;
       int switch2_x = 4;
       int switch2_y = 9;
+      if(sensor != 4 && this.acquired){
+        this.current.release();
+        this.acquired = false;
+    }
+    else {
+        this.acquired = true;
+    }
 
-      
       switch(sensor){
         case(0): 
           setSwitch(switch1_x, switch1_y,tsi.SWITCH_RIGHT);         this.dir=true;  break;
@@ -220,7 +225,7 @@ public void setSwitch(int x, int y, int dir) {
           if(this.rail!=null) {
             this.rail.release();
           }
-          if(dir) {
+          if(this.dir) {
             if(sections.get(1).tryAcquire()){
               this.rail = sections.get(1);
               setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);
@@ -239,6 +244,7 @@ public void setSwitch(int x, int y, int dir) {
           }
 
       }
+      t.setSpeed(t.speed);
     }
 
     public void section_two (Train t, int sensor){
@@ -248,33 +254,63 @@ public void setSwitch(int x, int y, int dir) {
       int switch4_x = 17;
       int switch4_y = 7;
       System.out.println(sensor);
+      if(sensor != 4 && this.acquired){
+          this.current.release();
+          this.acquired = false;
+      }
+      else {
+          this.acquired = true;
+      }
+      
       switch(sensor){
-        case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT); this.dir=true; break;
-        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT); this.dir=false;break;
-        case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);  this.dir=true; break;
-        case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);  this.dir=false; break;
+        case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT); this.dir=false; break;
+        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT); this.dir=true;break;
+        case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);  this.dir=false; break;
+        case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);  this.dir=true; break;
         case(4): 
           if(this.rail!=null) {
             this.rail.release();
           }
-          if(dir) {
+          if(!this.dir) {
             if(sections.get(1).tryAcquire()){
-              this.rail = sections.get(4);
-              setSwitch(switch4_x, switch4_y,tsi.SWITCH_LEFT);
-            }
-            else
-            setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
-          }
-          else{
-            if(sections.get(3).tryAcquire()){
               this.rail = sections.get(1);
-              setSwitch(switch3_x, switch3_y,tsi.SWITCH_LEFT);
-            }
-            else {
               setSwitch(switch3_x, switch3_y,tsi.SWITCH_RIGHT);
             }
+            else
+            setSwitch(switch3_x, switch3_y,tsi.SWITCH_LEFT);
           }
+          else{
+            if(sections.get(4).tryAcquire()){
+              this.rail = sections.get(4);
+              setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
+            }
+            else {
+              setSwitch(switch4_x, switch4_y,tsi.SWITCH_LEFT);
+            }
+          }
+          
       }
+      t.setSpeed(t.speed);
+     
+    }
+    void reverse_train(Train t){
+      try { 
+          if(!this.dir){
+            this.setSpeed(0); 
+            Thread.sleep(1000+(20*t.speed));
+            this.setSpeed(-t.speed);
+          }
+          else{
+            this.setSpeed(speed);
+          }
+        }
+        
+        catch (InterruptedException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+      
+  
     }
     public void run(){
       while(true){
