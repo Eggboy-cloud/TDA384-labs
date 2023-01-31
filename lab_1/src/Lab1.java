@@ -271,10 +271,10 @@ public void setSwitch(int x, int y, int dir) {
         }
         if(sensor == 1 || sensor == 3) {
           if(sections.get(4).tryAcquire()){
-            setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT)
+            setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT);
           }
           else {
-            setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT)
+            setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);
           }
           t.isAcquired = true;
         }
