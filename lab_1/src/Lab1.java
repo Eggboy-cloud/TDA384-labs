@@ -12,14 +12,14 @@ public class Lab1 {
     tsi.setDebug(true);
     Critical down_left = new Critical(0);
     down_left.add(3,13);
-    down_left.add(6,9);
-    down_left.add(5,11);
+    down_left.add(7,9);
+    down_left.add(6,11);
     down_left.add(6,10);
     //down_left.add(1,10);
     Critical down_middle = new Critical(1);
     Critical down_right = new Critical(2);
-    down_right.add(13,9);
-    down_right.add(15,7);
+    down_right.add(12,9);
+    down_right.add(14,7);
     down_right.add(13,10);
     down_right.add(15,8);
     //down_right.add(19,8);
@@ -27,6 +27,7 @@ public class Lab1 {
     down.add(10,11);
     down.add(10,13);
     Critical up_middle = new Critical(4);
+    up_middle.add(7,3);
     Critical cross = new Critical(5);
     cross.add(8,5);             // sensor up
     cross.add(6,7);             // sensor left
@@ -135,7 +136,7 @@ public void setSwitch(int x, int y, int dir) {
 
   private class Train implements Runnable{
     private final int id;
-    private final int speed;
+    private int speed;
     private SensorEvent sensor;
     private Critical current;
     private Critical rail;
@@ -178,7 +179,7 @@ public void setSwitch(int x, int y, int dir) {
         case(2): section_two(t,index);  break;
         case(3): reverse_train(t);      break;
         case(5): section_cross(t,index);break;
-        case(6): reverse_train(t);      break;
+        case(6): section_four(t, index); reverse_train(t);      break;
 
       }
 
@@ -301,20 +302,37 @@ public void setSwitch(int x, int y, int dir) {
       t.setSpeed(t.speed);
     }
 
+    void section_four(Train t, int sensor) {
+      Critical section = sections.get(4);
+      section.tryAcquire();
+    }
+
     void section_cross(Train t, int sensor){
-       this.setSpeed(t.speed); 
+      Critical section = sections.get(5);
+       if(!t.isAcquired) {
+        changeSection(section);
+        t.isAcquired = true; 
+       }
+      else {
+        section.release();
+        t.isAcquired = false;
+      }
+      this.setSpeed(this.speed);
+      
     }
 
     void reverse_train(Train t){
       try { 
           System.out.print(t.dir);
-          if(!this.dir){
-            t.setSpeed(0); 
-            Thread.sleep(1000+(20*t.speed));
-            t.setSpeed(-t.speed);
+          if(this.dir){
+            this.dir = false;
+            this.setSpeed(speed);
           }
           else{
-            this.setSpeed(speed);
+            t.setSpeed(0); 
+            Thread.sleep(1000+(25*t.speed));
+            this.speed = -this.speed;
+            t.setSpeed(t.speed);
           }
         }
         
