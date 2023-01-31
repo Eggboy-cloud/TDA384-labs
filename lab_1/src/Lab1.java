@@ -41,6 +41,8 @@ public class Lab1 {
     sections.add(down_right);   // section 2
     sections.add(down);         // section 3
     sections.add(up_middle);    // section 4
+
+
     sections.add(cross);        // section 5
     sections.add(up);           // section 6
     
@@ -208,17 +210,34 @@ public void setSwitch(int x, int y, int dir) {
 
       
       switch(sensor){
-        case(0): setSwitch(switch1_x, switch1_y,tsi.SWITCH_RIGHT); dir=true;  break;
-        case(2): setSwitch(switch1_x, switch1_y, tsi.SWITCH_LEFT); dir=true;  break;
-        case(1): setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);  dir=false; break;
-        case(3): setSwitch(switch2_x, switch2_y, tsi.SWITCH_RIGHT);dir=false; break;
+        case(0): 
+          setSwitch(switch1_x, switch1_y,tsi.SWITCH_RIGHT);         this.dir=true;  break;
+        case(2): 
+          setSwitch(switch1_x, switch1_y, tsi.SWITCH_LEFT);         this.dir=true;  break;
+        case(1): setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);   this.dir=false; break;
+        case(3): setSwitch(switch2_x, switch2_y, tsi.SWITCH_RIGHT); this.dir=false; break;
         case(4): 
+          if(this.rail!=null) {
+            this.rail.release();
+          }
           if(dir) {
             if(sections.get(1).tryAcquire()){
-              this.current = sections.get(1);
-
+              this.rail = sections.get(1);
+              setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);
+            }
+            else
+            setSwitch(switch2_x, switch2_y,tsi.SWITCH_RIGHT);
+          }
+          else{
+            if(sections.get(3).tryAcquire()){
+              this.rail = sections.get(3);
+              setSwitch(switch2_x, switch2_y,tsi.SWITCH_LEFT);
+            }
+            else {
+              setSwitch(switch2_x, switch2_y,tsi.SWITCH_RIGHT);
             }
           }
+
       }
     }
 
@@ -228,32 +247,33 @@ public void setSwitch(int x, int y, int dir) {
       int switch3_y = 9;
       int switch4_x = 17;
       int switch4_y = 7;
-      if(t.isAcquired && (sensor == 1 || sensor == 3)) {
-        if(sections.get(4).tryAcquire())
-              setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
-        else 
-              setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);
-        t.isAcquired = false;
-      }           
-      else if(t.isAcquired && (sensor == 2 || sensor == 0)) {
-        if(sections.get(1).tryAcquire())
-              setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT);
-        else
-              setSwitch(switch3_x, switch3_y,tsi.SWITCH_LEFT);
-        t.isAcquired = false;
-      }
-      else {
-        System.out.println("Acquring...");
-        t.isAcquired = true;
-      }
       System.out.println(sensor);
       switch(sensor){
-        case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT); break;
-        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT);
-          System.out.println("On sensor"); 
-          break;
-        case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);  break;
-        case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);  break;
+        case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT); this.dir=true; break;
+        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT); this.dir=false;break;
+        case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);  this.dir=true; break;
+        case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);  this.dir=false; break;
+        case(4): 
+          if(this.rail!=null) {
+            this.rail.release();
+          }
+          if(dir) {
+            if(sections.get(1).tryAcquire()){
+              this.rail = sections.get(4);
+              setSwitch(switch4_x, switch4_y,tsi.SWITCH_LEFT);
+            }
+            else
+            setSwitch(switch4_x, switch4_y,tsi.SWITCH_RIGHT);
+          }
+          else{
+            if(sections.get(3).tryAcquire()){
+              this.rail = sections.get(1);
+              setSwitch(switch3_x, switch3_y,tsi.SWITCH_LEFT);
+            }
+            else {
+              setSwitch(switch3_x, switch3_y,tsi.SWITCH_RIGHT);
+            }
+          }
       }
     }
     public void run(){
