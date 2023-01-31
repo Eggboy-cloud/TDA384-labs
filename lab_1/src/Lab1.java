@@ -140,7 +140,6 @@ public void setSwitch(int x, int y, int dir) {
     private Critical current;
     private Critical rail;
     private boolean isAcquired = false;
-    private boolean isDefault = true;
     //swtiches 15 9 right to zero cluster
     // switches 17 7 last before 4-crossing
     private boolean dir = true;
@@ -265,6 +264,7 @@ public void setSwitch(int x, int y, int dir) {
             else {
               setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);
             }
+          }
           if(sensor == 1) {
             sections.get(4).release();
           }
@@ -276,9 +276,7 @@ public void setSwitch(int x, int y, int dir) {
               setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);
             }
             t.isAcquired = true;
-          }
-        }
-          
+          }   
       }
     
       else {
