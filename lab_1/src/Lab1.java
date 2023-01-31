@@ -252,6 +252,12 @@ public void setSwitch(int x, int y, int dir) {
       int switch4_y = 7;
       Critical section = sections.get(2);
       System.out.println(sensor);
+      if(sensor == 0){
+        System.out.println(t.isAcquired);
+      }
+      if(sensor == 1) {
+        System.out.println(t.isAcquired);
+      }
       if(!t.isAcquired) {
           changeSection(section);
           if(sensor == 0) {
@@ -275,8 +281,9 @@ public void setSwitch(int x, int y, int dir) {
             else {
               setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);
             }
-            t.isAcquired = true;
+      
           }   
+          t.isAcquired = true;
       }
     
       else {
@@ -303,7 +310,7 @@ public void setSwitch(int x, int y, int dir) {
           System.out.print(t.dir);
           if(!this.dir){
             t.setSpeed(0); 
-            Thread.sleep(1+(2*t.speed));
+            Thread.sleep(1000+(20*t.speed));
             t.setSpeed(-t.speed);
           }
           else{
