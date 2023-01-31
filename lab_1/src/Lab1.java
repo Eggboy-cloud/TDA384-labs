@@ -218,6 +218,7 @@ public void setSwitch(int x, int y, int dir) {
     }
 
     public void section_two (Train t, int sensor){
+      System.out.println("In method");
       int switch3_x = 15;
       int switch3_y = 9;
       int switch4_x = 17;
@@ -242,7 +243,8 @@ public void setSwitch(int x, int y, int dir) {
       switch(sensor){
         case(0): setSwitch(switch3_x, switch3_y, tsi.SWITCH_RIGHT); break;
         case(2): setSwitch(switch3_x, switch3_y, tsi.SWITCH_LEFT);  break;
-        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT); break;
+        case(1): setSwitch(switch4_x, switch4_y, tsi.SWITCH_RIGHT);
+        System.out.println("On sensor"); break;
         case(3): setSwitch(switch4_x, switch4_y, tsi.SWITCH_LEFT);  break;
       }
     }
@@ -251,6 +253,7 @@ public void setSwitch(int x, int y, int dir) {
         try {
           this.sensor = tsi.getSensor(this.id);
           Critical current = isCritical(sensor.getXpos(), sensor.getYpos());
+          System.out.println("sensor from " + current.id + " triggered");
           check_track(current, this);
         } 
 
