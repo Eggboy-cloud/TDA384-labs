@@ -22,16 +22,25 @@ public class Lab1 {
     down_right.add(14,10);
     down_right.add(16,8);
     Critical down = new Critical(3);
+    down.add(10,11);
+    down.add(10,13);
     Critical up_middle = new Critical(4);
     Critical cross = new Critical(5);
+    cross.add(8,5);             // sensor up
+    cross.add(6,7);             // sensor left
+    cross.add(10,7);            // sensor right
+    cross.add(9,8);             // sensor down
     Critical up = new Critical(6);
-    sections.add(down_left);    //section 0
-    sections.add(down_middle);  //section 1
-    sections.add(down_right);   //section 2
-    sections.add(down);         //section 3
-    sections.add(up_middle);    //section 4
-    sections.add(cross);        //section 5
-    sections.add(up);           //section 6
+    up.add(10,3);
+    up.add(10,5);
+
+    sections.add(down_left);    // section 0
+    sections.add(down_middle);  // section 1
+    sections.add(down_right);   // section 2
+    sections.add(down);         // section 3
+    sections.add(up_middle);    // section 4
+    sections.add(cross);        // section 5
+    sections.add(up);           // section 6
     
     // create threads for each train
     Thread t_1 = new Thread(new Train(1,speed1));
