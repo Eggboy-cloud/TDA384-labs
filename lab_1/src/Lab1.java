@@ -339,10 +339,10 @@ public void setSwitch(int x, int y, int dir) {
             this.setSpeed(speed);
           }
           else{
-            t.setSpeed(0); 
-            Thread.sleep(1000+(25*t.speed));
+            this.setSpeed(0); 
+            Thread.sleep(2000+(20*t.speed));
             this.speed = -this.speed;
-            t.setSpeed(t.speed);
+            this.setSpeed(t.speed);
           }
         }
         
