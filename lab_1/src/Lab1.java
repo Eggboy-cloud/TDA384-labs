@@ -177,9 +177,10 @@ public void setSwitch(int x, int y, int dir) {
       switch(c.id) {
         case(0): section_zero(t,index); break; 
         case(2): section_two(t,index);  break;
-        case(3): reverse_train(t);      break;
+        case(4): section_four(t, index);break;
+        case(3): section_three(index); reverse_train(t);      break;
         case(5): section_cross(t,index);break;
-        case(6): section_four(t, index); reverse_train(t);      break;
+        case(6): reverse_train(t);      break;
 
       }
 
@@ -195,6 +196,15 @@ public void setSwitch(int x, int y, int dir) {
         System.exit(1);
       }
     }
+
+    public void section_three(int sensor){
+      System.out.println("In here");
+      Critical section = sections.get(3);
+      if(sensor == 0){
+          System.out.println("Acquired");
+          section.tryAcquire();
+        }
+    }
   
     public void section_zero (Train t, int sensor){
       int switch1_x = 3;
@@ -209,7 +219,6 @@ public void setSwitch(int x, int y, int dir) {
           sections.get(3).release();
         }
         if(sensor == 0 || sensor == 2) {
-          sections.get(3).release();
           if (sections.get(1).tryAcquire()){
             setSwitch(switch2_x, switch2_y, tsi.SWITCH_LEFT);
           }
@@ -305,6 +314,7 @@ public void setSwitch(int x, int y, int dir) {
     void section_four(Train t, int sensor) {
       Critical section = sections.get(4);
       section.tryAcquire();
+      this.setSpeed(this.speed);
     }
 
     void section_cross(Train t, int sensor){
