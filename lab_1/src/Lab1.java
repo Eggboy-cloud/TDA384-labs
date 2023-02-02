@@ -22,23 +22,22 @@ public class Lab1 {
     down.add(13,11);
     down.add(13,13);
     Critical down_left = new Critical(1);
-    down_left.add(3,13);
+    down_left.add(5,13);
     down_left.add(8,9);
-    down_left.add(6,11);
-    down_left.add(6,10);
+    down_left.add(7,11);
+    down_left.add(8,10);
     Critical down_middle = new Critical(2);
     Critical down_right = new Critical(3);
     down_right.add(11,9);
     down_right.add(13,7);
-    down_right.add(13,10);
-    down_right.add(15,8);
+    down_right.add(11,10);
+    down_right.add(13,8);
     Critical up_middle = new Critical(4);
-    up_middle.add(7,3);
     Critical cross = new Critical(5);
-    cross.add(8,5);             // sensor up
-    cross.add(6,7);             // sensor left
+    cross.add(10,5);            // sensor up
+    cross.add(6,5);             // sensor left
     cross.add(12,7);            // sensor right
-    cross.add(10,8);            // sensor down
+    cross.add(12,8);            // sensor down
     Critical up = new Critical(6);
     up.add(13,3);
     up.add(13,5);
@@ -89,12 +88,15 @@ public class Lab1 {
     return null;
   }
   /**
-   * The Class that holds
+   * The Class that holds sensors for each Critical section
+   * It extends the Semaphore class since only a single train 
+   * should have access to the section
    */
   public class Critical extends Semaphore{
       private ArrayList<Sensor> positions = new ArrayList<Sensor>(); 
       private int id;
 
+      //Private Class for sensor
       private class Sensor {
         int x;
         int y;
@@ -104,7 +106,8 @@ public class Lab1 {
           this.y = y;
         }
       }
-
+      //Uses the semaphore constructor
+      //And gives an id
       public Critical(int id){
         super(1,true);
         this.id = id;
@@ -122,7 +125,7 @@ public class Lab1 {
         return positions.indexOf(sensor);
       }
     }
-
+  //Train Class which can be run in a thread
   private class Train implements Runnable{
     private final int id;
     private int speed;
@@ -157,7 +160,7 @@ public class Lab1 {
       }
       return -1;
     }
-
+    //Chooses the correct code to run based on the id of the Critical section
     void check_track(Critical c){
       int index = getIndex(c);
       
@@ -165,10 +168,9 @@ public class Lab1 {
       switch(c.id) {
       case(0): section_zero(index); reverse_train(c.id);  break;
       case(1): section_one(index);                        break; 
-      case(3): section_three(index);                      break;
-      case(4): section_four(index);                       break; 
+      case(3): section_three(index);                      break; 
       case(5): section_cross(index);                      break;
-      case(6): reverse_train(c.id);                       break;
+      case(6): section_four(index); reverse_train(c.id);  break;
       }
     }
 
@@ -286,8 +288,10 @@ public class Lab1 {
 
     void section_four(int sensor) {
       Critical section = sections.get(4);
-      section.tryAcquire();
-      this.setSpeed(this.speed);
+      if(sensor == 0) {
+        section.tryAcquire();
+        this.setSpeed(this.speed);
+      }
     }
 
     void section_cross(int sensor){
@@ -330,7 +334,7 @@ public class Lab1 {
           System.exit(1);
         }
     }
-    
+    //Finds the sensor and checks which Critical section it belongs to
     public void run(){
       while(true){
         try {
