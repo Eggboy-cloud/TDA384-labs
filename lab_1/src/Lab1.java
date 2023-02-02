@@ -43,10 +43,10 @@ public class Lab1 {
     up.add(10,3);
     up.add(10,5);
 
-    sections.add(down);         // section 3
-    sections.add(down_left);    // section 0
-    sections.add(down_middle);  // section 1
-    sections.add(down_right);   // section 2
+    sections.add(down);         // section 0
+    sections.add(down_left);    // section 1
+    sections.add(down_middle);  // section 2
+    sections.add(down_right);   // section 3
     sections.add(up_middle);    // section 4
     sections.add(cross);        // section 5
     sections.add(up);           // section 6
@@ -88,7 +88,9 @@ public class Lab1 {
     }
     return null;
   }
-  
+  /**
+   * The Class that holds
+   */
   public class Critical extends Semaphore{
       private ArrayList<Sensor> positions = new ArrayList<Sensor>(); 
       private int id;
