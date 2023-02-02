@@ -18,21 +18,20 @@ public class Lab1 {
    *              speed of the second train
    */
   public Lab1(int speed1, int speed2) {
-    
-    Critical down_left = new Critical(0);
+    Critical down = new Critical(0);
+    down.add(10,11);
+    down.add(10,13);
+    Critical down_left = new Critical(1);
     down_left.add(3,13);
     down_left.add(7,9);
     down_left.add(6,11);
     down_left.add(6,10);
-    Critical down_middle = new Critical(1);
-    Critical down_right = new Critical(2);
+    Critical down_middle = new Critical(2);
+    Critical down_right = new Critical(3);
     down_right.add(12,9);
     down_right.add(14,7);
     down_right.add(13,10);
     down_right.add(15,8);
-    Critical down = new Critical(3);
-    down.add(10,11);
-    down.add(10,13);
     Critical up_middle = new Critical(4);
     up_middle.add(7,3);
     Critical cross = new Critical(5);
@@ -44,10 +43,10 @@ public class Lab1 {
     up.add(10,3);
     up.add(10,5);
 
+    sections.add(down);         // section 3
     sections.add(down_left);    // section 0
     sections.add(down_middle);  // section 1
     sections.add(down_right);   // section 2
-    sections.add(down);         // section 3
     sections.add(up_middle);    // section 4
     sections.add(cross);        // section 5
     sections.add(up);           // section 6
@@ -162,11 +161,11 @@ public class Lab1 {
       
       this.setSpeed(0);
       switch(c.id) {
-      case(0): section_zero(index);                   break; 
-      case(2): section_two(index);                    break;
-      case(4): section_four(index);                   break;
-      case(3): section_three(index); reverse_train(c.id); break;
-      case(5): section_cross(index);                  break;
+      case(0): section_zero(index); reverse_train(c.id);  break;
+      case(1): section_one(index);                        break; 
+      case(3): section_three(index);                      break;
+      case(4): section_four(index);                       break; 
+      case(5): section_cross(index);                      break;
       case(6): reverse_train(c.id);                       break;
       }
     }
@@ -181,20 +180,20 @@ public class Lab1 {
       }
     }
   
-    void section_zero (int sensor){
+    void section_one (int sensor){
       int switch1_x = 3;
       int switch1_y = 11;
       int switch2_x = 4;
       int switch2_y = 9;
-      Critical section = sections.get(0);
+      Critical section = sections.get(1);
 
       if(!this.isAcquired) {
         changeSection(section);
         if(sensor == 2) {
-          sections.get(3).release();
+          sections.get(0).release();
         }
         if(sensor == 0 || sensor == 2) {
-          if (sections.get(1).tryAcquire()){
+          if (sections.get(2).tryAcquire()){
             setSwitch(switch2_x, switch2_y, SWITCH_LEFT);
           }
           else {
@@ -203,9 +202,9 @@ public class Lab1 {
         }
         if(sensor == 1 || sensor == 3) {
           if (sensor == 1) {
-            sections.get(1).release();
+            sections.get(2).release();
           }
-          if(sections.get(3).tryAcquire()){
+          if(sections.get(0).tryAcquire()){
             setSwitch(switch1_x, switch1_y, SWITCH_LEFT);
           }
           else{
@@ -227,16 +226,16 @@ public class Lab1 {
       this.setSpeed(this.speed);
     }
 
-    void section_two (int sensor){
+    void section_three (int sensor){
       int switch3_x = 15;
       int switch3_y = 9;
       int switch4_x = 17;
       int switch4_y = 7;
-      Critical section = sections.get(2);
+      Critical section = sections.get(3);
       if(!this.isAcquired) {
           changeSection(section);
           if(sensor == 0) {
-            sections.get(1).release();
+            sections.get(2).release();
           }
           if(sensor == 0 || sensor == 2) {
             if(sections.get(4).tryAcquire()) {
@@ -250,7 +249,7 @@ public class Lab1 {
             sections.get(4).release();
           }
           if(sensor == 1 || sensor == 3) {
-            if(sections.get(1).tryAcquire()){
+            if(sections.get(2).tryAcquire()){
               setSwitch(switch3_x, switch3_y, SWITCH_RIGHT);
             }
             else {
@@ -276,8 +275,8 @@ public class Lab1 {
       this.setSpeed(this.speed);
     }
 
-    void section_three(int sensor){
-      Critical section = sections.get(3);
+    void section_zero(int sensor){
+      Critical section = sections.get(0);
       if(sensor == 0){
           section.tryAcquire();
         }
@@ -305,7 +304,7 @@ public class Lab1 {
 
     void reverse_train(int id){
       try { 
-          if(this.dir && id == 3){
+          if(this.dir && id == 0){
             this.dir = false;
             this.setSpeed(0); 
             Thread.sleep(2000+(20*this.speed));
