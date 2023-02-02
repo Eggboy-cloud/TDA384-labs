@@ -187,6 +187,12 @@ public class Lab1 {
         System.exit(1);
       }
     }
+    void section_zero(int sensor){
+      Critical section = sections.get(0);
+      if(sensor == 0){
+          section.tryAcquire();
+        }
+    }
   
     void section_one (int sensor){
       int switch1_x = 3;
@@ -283,13 +289,6 @@ public class Lab1 {
       this.setSpeed(this.speed);
     }
 
-    void section_zero(int sensor){
-      Critical section = sections.get(0);
-      if(sensor == 0){
-          section.tryAcquire();
-        }
-    }
-
     void section_four(int sensor) {
       Critical section = sections.get(4);
       if(sensor == 0) {
@@ -338,6 +337,7 @@ public class Lab1 {
           System.exit(1);
         }
     }
+
     //Finds the sensor and checks which Critical section it belongs to
     public void run(){
       while(true){
