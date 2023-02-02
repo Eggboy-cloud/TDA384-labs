@@ -50,7 +50,7 @@ public class Lab1 {
     sections.add(cross);        // section 5
     sections.add(up);           // section 6
     
-    // create threads for each train
+    // Create threads for each train
     Thread t_1 = new Thread(new Train(1,speed1));
     t_1.start();
     Thread t_2 = new Thread(new Train(2,speed2));
@@ -160,7 +160,11 @@ public class Lab1 {
       }
       return -1;
     }
-    //Chooses the correct code to run based on the id of the Critical section
+  /**
+   * Chooses the correct code to run based on the id of the Critical section
+   * @param c
+   *         The critical section the train is in currently
+   */
     void check_track(Critical c){
       int index = getIndex(c);
       
