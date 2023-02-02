@@ -19,17 +19,17 @@ public class Lab1 {
    */
   public Lab1(int speed1, int speed2) {
     Critical down = new Critical(0);
-    down.add(10,11);
-    down.add(10,13);
+    down.add(13,11);
+    down.add(13,13);
     Critical down_left = new Critical(1);
     down_left.add(3,13);
-    down_left.add(7,9);
+    down_left.add(8,9);
     down_left.add(6,11);
     down_left.add(6,10);
     Critical down_middle = new Critical(2);
     Critical down_right = new Critical(3);
-    down_right.add(12,9);
-    down_right.add(14,7);
+    down_right.add(11,9);
+    down_right.add(13,7);
     down_right.add(13,10);
     down_right.add(15,8);
     Critical up_middle = new Critical(4);
@@ -37,11 +37,11 @@ public class Lab1 {
     Critical cross = new Critical(5);
     cross.add(8,5);             // sensor up
     cross.add(6,7);             // sensor left
-    cross.add(11,7);            // sensor right
+    cross.add(12,7);            // sensor right
     cross.add(10,8);            // sensor down
     Critical up = new Critical(6);
-    up.add(10,3);
-    up.add(10,5);
+    up.add(13,3);
+    up.add(13,5);
 
     sections.add(down);         // section 0
     sections.add(down_left);    // section 1
