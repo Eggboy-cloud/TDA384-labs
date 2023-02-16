@@ -124,6 +124,4 @@ client_send(Channel, Nick, Msg, [From | List]) ->
 % Stop the server process registered to the given name,
 % together with any other associated processes
 stop(ServerAtom) ->
-    % TODO Implement function
-    % Return ok
-    not_implemented.
+    exit(ServerAtom, normal).
