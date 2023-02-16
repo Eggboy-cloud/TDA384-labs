@@ -38,7 +38,7 @@ handle(St, {leave, Channel}) ->
 
 % Sending message (from GUI, to channel)
 handle(St, {message_send, Channel, Msg}) ->
-    gen_server:request(St#client_st.server,{message_send, Channel, Msg,self()}),
+    gen_server:request(St#client_st.server,{message_send, Channel, Msg, St#client_st.nick, self()}),
     {reply, ok, St} ;
 
 % This case is only relevant for the distinction assignment!

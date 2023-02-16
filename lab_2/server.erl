@@ -30,13 +30,15 @@ findChannel(Channel, [{C,_} | List]) ->
             findChannel(Channel, List)
     end.
 
-appendClient(Client, Channel , [C,X | List]) ->
+appendClient(Client, Channel , [{C,X} | List]) ->
     case Channel = C of
         true ->
             X = append(X,Client);
         false ->
-            appendClient(Client, Channel , [C,X | List])
-    end.
+            appendClient(Client, Channel , List)
+    end,
+    [{C,X} | List].
+
 
 helper_pid(_, []) ->
     false;
@@ -68,8 +70,9 @@ removeClient(Client, Channel , [{C,X} | List]) ->
         true ->
             X = [L|| L <-X, L /= Client];
         false ->
-            appendClient(Client, Channel , [C,X | List])
-    end.
+            removeClient(Client, Channel , List)
+    end,
+    [{C,X}|List].
 
 handle(St,{join,Channel,From}) ->
     case findChannel(Channel,St#server_st.channels) of
@@ -97,9 +100,26 @@ handle(St,{leave, Channel,From}) ->
             {user_not_joined, make_ref(), St}
         end;
 
-handle(St,{message_send, Channel, Msg,From}) ->
-    not_implemented.
+handle(St,{message_send, Channel, Msg, Nick, From}) ->
+    case findPid(From, Channel ,St#server_st.channels) of
+        true ->
+            send_message(Channel, Nick, Msg, St#server_st.channels),
+            {reply, make_ref(), St};
+        false ->
+            {user_not_joined, make_ref(), St}
+        end.
 
+send_message(Channel, Nick, Msg, [{C,X}|List]) ->
+    case Channel = C of
+        true ->
+            client_send(Channel, Nick, Msg, X);
+        false ->
+            send_message(Channel, Nick, Msg, List)
+        end.
+
+client_send(Channel, Nick, Msg, [From | List]) ->
+    From ! {Msg, Channel, Nick, Msg},
+    client_send(Channel, Nick, Msg, List).
 
 % Stop the server process registered to the given name,
 % together with any other associated processes
