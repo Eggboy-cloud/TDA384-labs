@@ -28,22 +28,18 @@ initial_state(Nick, GUIAtom, ServerAtom) ->
 
 % Join channel
 handle(St, {join, Channel}) ->
-    genserver::request(#client_st{server},{join,Channel})
-    % TODO: Implement this function
-    % {reply, ok, St} ;
+    gen_server:request(St#client_st.server,{join,Channel,self()}),
     {reply, ok, St} ;
 
 % Leave channel
 handle(St, {leave, Channel}) ->
-    % TODO: Implement this function
-    % {reply, ok, St} ;
-    {reply, {error, not_implemented, "leave not implemented"}, St} ;
+    gen_server:request(St#client_st.server,{leave,Channel,self()}),
+    {reply, ok, St} ;
 
 % Sending message (from GUI, to channel)
 handle(St, {message_send, Channel, Msg}) ->
-    % TODO: Implement this function
-    % {reply, ok, St} ;
-    {reply, {error, not_implemented, "message sending not implemented"}, St} ;
+    gen_server:request(St#client_st.server,{message_send, Channel, Msg,self()}),
+    {reply, ok, St} ;
 
 % This case is only relevant for the distinction assignment!
 % Change nick (no check, local only)

@@ -1,23 +1,105 @@
 -module(server).
--export([start/1,stop/1,loop/1]).
+-import(lists,[append/2]).
+-export([start/1,stop/1,handle/2, initial_state/2, findChannel/2, appendClient/3,helper_pid/2,findPid/3,removeClient/3]).
 
-% Start a new server process with the given name
-% Do not change the signature of this function.
+-record(server_st, {
+    server, % atom of the chat server
+    channels % all current channels
+}).
+
+initial_state(ServerAtom, channelList) ->
+    #server_st{
+        server = ServerAtom,
+        channels = channelList
+    }.
+
+
+% - Spawn a new process which waits for a message, handles it, then loops infinitely
+% - Register this process to ServerAtom
+% - Return the process ID
 start(ServerAtom) -> 
-    spawn(fun () -> genserver::start(ServerAtom, State, do_this) end).
+    spawn(fun () -> gen_server:start(ServerAtom, initial_state(ServerAtom, [] ), handle) end).
 
-do_this(State, Data) ->
-    case catch(Data) of 
-        {join , Channel} -> {reply, ok, State},
+findChannel(_, []) ->
+    false;
+findChannel(Channel, [{C,_} | List]) ->
+    case Channel = C of
+        true ->
+            true;
+        false ->
+            findChannel(Channel, List)
     end.
-    % TODO Implement function
-    % - Spawn a new process which waits for a message, handles it, then loops infinitely
-    % - Register this process to ServerAtom
-    % - Return the process ID
-join(ServerAtom,Channel) ->
-    ServerAtom ! {join, Channel, self()},
-    % TODO make list for a server that contains all channels and if channels does not exist make new
-    % basically like channels[]
+
+appendClient(Client, Channel , [C,X | List]) ->
+    case Channel = C of
+        true ->
+            X = append(X,Client);
+        false ->
+            appendClient(Client, Channel , [C,X | List])
+    end.
+
+helper_pid(_, []) ->
+    false;
+helper_pid(Client, [X | List]) ->
+    case Client = X of
+        true ->
+            true;
+        false ->
+            helper_pid(Client,List)
+    end.
+
+findPid(_,_,[]) ->
+    false;
+findPid(Client,Channel, [{C,X} | List]) ->
+    case Channel = C of
+        true -> 
+            case helper_pid(Client, X) of
+                true ->
+                    true;
+                false ->
+                    false
+                end;
+        false ->
+            findPid(Client, Channel, List)
+    end.
+
+removeClient(Client, Channel , [{C,X} | List]) ->
+    case Channel = C of
+        true ->
+            X = [L|| L <-X, L /= Client];
+        false ->
+            appendClient(Client, Channel , [C,X | List])
+    end.
+
+handle(St,{join,Channel,From}) ->
+    case findChannel(Channel,St#server_st.channels) of
+        true ->
+            case findPid(From,Channel,St#server_st.channels) of
+                true ->
+                    {user_already_joined,make_ref(),St};
+                false ->
+                    list = appendClient(From, Channel, St#server_st.channels),
+                    {reply, make_ref(), St#server_st{channels = list}}
+                end;
+        false ->
+            list = append({Channel,[]},St#server_st.channels),
+            list = appendClient(From, Channel, list),
+            {reply, make_ref(), St#server_st{channels = list}}
+        end;
+    
+
+handle(St,{leave, Channel,From}) ->
+    case findPid(From, Channel ,St#server_st.channels) of
+        true ->
+            list = removeClient(From, Channel, St#server_st.channels),
+            {reply, make_ref(), St#server_st{channels = list}};
+        false ->
+            {user_not_joined, make_ref(), St}
+        end;
+
+handle(St,{message_send, Channel, Msg,From}) ->
+    not_implemented.
+
 
 % Stop the server process registered to the given name,
 % together with any other associated processes
