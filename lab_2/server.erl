@@ -18,7 +18,7 @@ initial_state(ServerAtom, channelList) ->
 % - Register this process to ServerAtom
 % - Return the process ID
 start(ServerAtom) -> 
-    spawn(fun () -> gen_server:start(ServerAtom, initial_state(ServerAtom, [] ), handle) end).
+    gen_server:start(ServerAtom, initial_state(ServerAtom, [] ), handle).
 
 findChannel(_, []) ->
     false;
