@@ -1,141 +1,112 @@
 -module(server).
--export([start/1,stop/1,handle/2, initial_state/2, findChannel/2, appendClient/3,helper_pid/2,findPid/3,removeClient/3,client_send/5]).
+-export([start/1,stop/1,handle/2, initial_state/1, findAtom/2]).
 
 -record(server_st, {
     server, % atom of the chat server
-    channels % all current channels
+    channels, % all current channels
+    nicks % all current nicks
 }).
 
-initial_state(ServerAtom, ChannelList) ->
+
+
+%initial state for the server
+initial_state(ServerAtom) ->
     #server_st{
         server = ServerAtom,
-        channels = ChannelList
+        channels = [],
+        nicks = []
     }.
-
 
 % - Spawn a new process which waits for a message, handles it, then loops infinitely
 % - Register this process to ServerAtom
 % - Return the process ID
 start(ServerAtom) -> 
-    genserver:start(ServerAtom, initial_state(ServerAtom, [] ), fun handle/2).
+    genserver:start(ServerAtom, initial_state(ServerAtom), fun handle/2).
 
-findChannel(_, []) ->
+% - Helper function which functions as member from the lists module
+% - Return true if Atom exists in list else returns false
+findAtom(_, []) ->
     false;
-findChannel(Channel, [{C,_} | List]) ->
-    case Channel == C of
+findAtom(Atom, [A | List]) ->
+    case Atom == A of
         true ->
             true;
         false ->
-            findChannel(Channel, List)
+            findAtom(Atom, List)
     end.
 
-appendClient(From, Channel, [{C,X} | List]) ->
-    case Channel == C of
+% - All different commands to the server which handles:
+% - Join, joining a channel and registering the nick of the user
+% - Leave, leaving a channel
+% - Send Message - allows sending messages to all other users in a channel
+% - New Nick - changes nick for the user if the new nick is not already used
+handle(St,{join,Nick,Channel,From}) ->
+    case findAtom(Nick, St#server_st.nicks) of
+        false ->
+            L = [Nick | St#server_st.nicks];
         true ->
-            L = [From | X],
-            L2 = List;
-        false ->    
-            L = X,
-            L2 = appendClient(From, Channel , List)
+            L = St#server_st.nicks
     end,
-    io:fwrite("~p~n", [[{C,L} | L2]]),
-    [{C,L} | L2].
-
-
-
-helper_pid(_, []) ->
-    false;
-helper_pid(Client, [X | List]) ->
-    case Client == X of
+    case findAtom(Channel,St#server_st.channels) of
         true ->
-            true;
+            %sends request to Channel thread to add a user to the Channel
+            Result = genserver:request(list_to_atom(Channel),{joinClient, From}),
+            {reply, Result, St#server_st{nicks = L}}; 
         false ->
-            helper_pid(Client,List)
-    end.
-
-findPid(_,_,[]) ->
-    false;
-findPid(Client,Channel, [{C,X} | List]) ->
-    case Channel == C of
-        true -> 
-            case helper_pid(Client, X) of
-                true ->
-                    true;
-                false ->
-                    false
-                end;
-        false ->
-            findPid(Client, Channel, List)
-    end.
-
-removeClient(Client, Channel , [{C,X} | List]) ->
-    case Channel == C of
-        true ->
-            S = [L|| L <-X, L /= Client];
-        false ->
-            S = X,
-            List = removeClient(Client, Channel , List)
-    end,
-    [{C,S}|List].
-
-handle(St,{join,Channel,From}) ->
-    io:fwrite("~p~n", [Channel]),
-    case findChannel(Channel,St#server_st.channels) of
-        true ->
-            case findPid(From,Channel,St#server_st.channels) of
-                true ->
-                    {user_already_joined, ok, St};
-                false ->
-                    io:fwrite("Old Channel, ~p~n", [From]),
-                    List = appendClient(From, Channel, St#server_st.channels),
-                    io:fwrite("~p~n", [List]),
-                    {reply, ok, St#server_st{channels = List}}
-                end;
-        false ->
-            io:fwrite("New Channel, ~p~n", [From]),
-            L1 = [{Channel, []} | St#server_st.channels],
-            L2 = appendClient(From, Channel, L1),
-            {reply, ok, St#server_st{channels = L2}}
-        end;
-    
-
-handle(St,{leave, Channel,From}) ->
-    case findPid(From, Channel ,St#server_st.channels) of
-        true ->
-            List = removeClient(From, Channel, St#server_st.channels),
-            {reply, ok, St#server_st{channels = List}};
-        false ->
-            {user_not_joined, ok, St}
+            %starts a thread for the Channel in Genserver
+            genserver:start(list_to_atom(Channel), [From], fun handle/2),
+            List = [Channel | St#server_st.channels],
+            {reply, ok, St#server_st{channels = List, nicks = L}}
         end;
 
-handle(St,{message_send, Channel, Msg, Nick, From}) ->
-    case findPid(From, Channel ,St#server_st.channels) of
+% - Helper function that Channel threads handle
+handle(List,{joinClient, From}) ->
+    case findAtom(From, List) of
         true ->
-            send_message(From, Channel, Nick, Msg, St#server_st.channels),
-            {reply, ok, St};
+            {reply, error, List};
         false ->
-            {user_not_joined, ok, St}
-        end.
+            L = [From | List],
+            {reply, ok, L}
+        end;
+        
+handle(List,{leave,From}) ->
+    case findAtom(From, List) of
+        true ->
+            % removes user from list
+            S = [L|| L <-List, L /= From],
+            {reply, ok, S};
+        false ->
+            {reply, error, List}
+        end;
 
-send_message(From, Channel, Nick, Msg, [{C,X}|List]) ->
-    case Channel == C of
+handle(List,{message_send, Channel, Msg, Nick, From}) ->
+    case findAtom(From, List) of
         true ->
-            client_send(From, Channel, Nick, Msg, X);
+            % sends request to user for sending message to GUI
+            Data = {request, self(), make_ref(),{message_receive, Channel, Nick, Msg}},
+            [Client ! Data || Client <- List, Client /=From],
+            {reply, ok, List};
         false ->
-            send_message(From, Channel, Nick, Msg, List)
-        end.
-client_send(_,_,_,_,[]) ->
-    ok;
-client_send(Pid, Channel, Nick, Msg, [From | List]) ->
-    io:fwrite("~p~n", [From]),
-    case Pid /= From of
+            {reply, error, List}
+        end;
+
+handle(St, {nick, OldNick, NewNick}) ->
+    case findAtom(NewNick, St#server_st.nicks) of
         true ->
-            genserver:request(From,{message_receive, Channel, Nick, Msg});
-        false -> 
-            client_send(Pid, Channel, Nick, Msg, List)
-        end.
+            {reply, error, St};
+        false ->
+            %replaces old nick with new nick
+            List = [NewNick | lists:delete(OldNick, St#server_st.nicks)],
+            {reply, ok, St#server_st{nicks = List}}
+        end;
+
+% - Kills all Channels
+handle(St,kill) ->
+    [genserver:stop(list_to_atom(Channel)) ||Channel <- St#server_st.channels],
+    {reply, ok, St#server_st{channels = []}}.
 
 % Stop the server process registered to the given name,
 % together with any other associated processes
 stop(ServerAtom) ->
-    exit(ServerAtom, normal).
+    genserver:request(ServerAtom,kill),
+    genserver:stop(ServerAtom).

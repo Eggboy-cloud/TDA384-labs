@@ -28,23 +28,69 @@ initial_state(Nick, GUIAtom, ServerAtom) ->
 
 % Join channel
 handle(St, {join, Channel}) ->
-    genserver:request(St#client_st.server,{join,Channel,self()}),
-    {reply, ok, St} ;
+    % checks if server is active
+    case lists:member(St#client_st.server, registered()) of
+        true ->
+            try Result = genserver:request(St#client_st.server,{join, St#client_st.nick,Channel,self()}),
+                case Result of
+                    % pattern matches the result with response
+                    ok -> {reply, ok, St};
+                    error -> {reply,{error, user_already_joined, "User already in channel"},St}
+                    end
+            catch
+                timeout_error -> {reply,{error, server_not_reached, "Server not responding"}, St}
+            end;
+        false ->
+            {reply,{error, server_not_reached, "No server"}, St}
+        end;
+    
 
 % Leave channel
 handle(St, {leave, Channel}) ->
-    genserver:request(St#client_st.server,{leave,Channel,self()}),
-    {reply, ok, St} ;
+    Result = genserver:request(list_to_atom(Channel),{leave,self()}),
+        case Result of
+            % pattern matches the result with response
+            ok -> {reply, ok, St};
+            error -> {reply,{error, user_not_joined, "User not in channel"},St}
+            end;
 
 % Sending message (from GUI, to channel)
 handle(St, {message_send, Channel, Msg}) ->
-    genserver:request(St#client_st.server,{message_send, Channel, Msg, St#client_st.nick, self()}),
-    {reply, ok, St} ;
+    % checks if server is active
+    case lists:member(list_to_atom(Channel), registered()) of
+            true ->
+                try Result = genserver:request(list_to_atom(Channel),{message_send, Channel, Msg, St#client_st.nick, self()}),
+                    case Result of
+                        % pattern matches the result with response
+                        ok -> {reply, ok, St};
+                        error -> {reply,{error, user_not_joined, "User not in channel"},St}
+                        end
+                catch
+                    timeout_error -> {reply,{error, server_not_reached, "Server not responding"}, St}
+                end;
+            false ->
+                {reply,{error, server_not_reached, "No server"}, St}
+            end;
+
 
 % This case is only relevant for the distinction assignment!
 % Change nick (no check, local only)
 handle(St, {nick, NewNick}) ->
-    {reply, ok, St#client_st{nick = NewNick}} ;
+    % checks if server is active
+    case lists:member(St#client_st.server, registered()) of
+        true ->
+            try Result = genserver:request(St#client_st.server,{nick, St#client_st.nick, NewNick}),
+                case Result of
+                    % pattern matches the result with response
+                    ok -> {reply, ok, St#client_st{nick = NewNick}} ;
+                    error -> {reply,{error, nick_taken, "Nickname is already taken"},St}
+                    end
+            catch
+                timeout_error -> {reply,{error, server_not_reached, "Server not responding"}, St}
+            end;
+        false ->
+            {reply,{error, server_not_reached, "No server"}, St}
+        end;
 
 % ---------------------------------------------------------------------------
 % The cases below do not need to be changed...
@@ -65,5 +111,5 @@ handle(St, quit) ->
     {reply, ok, St} ;
 
 % Catch-all for any unhandled requests
-handle(St, Data) ->
+handle(St, _) ->
     {reply, {error, not_implemented, "Client does not handle this command"}, St} .
