@@ -29,11 +29,11 @@ initial_state(Nick, GUIAtom, ServerAtom) ->
 % Join channel
 handle(St, {join, Channel}) ->
     % checks if server is active
-    case lists:member(St#client_st.server, registered()) of
+    case server:findAtom(St#client_st.server, registered()) of
         true ->
             try Result = genserver:request(St#client_st.server,{join, St#client_st.nick,Channel,self()}),
                 case Result of
-                    % pattern matches the result with response
+                    % pattern matches the result with responsegi
                     ok -> {reply, ok, St};
                     error -> {reply,{error, user_already_joined, "User already in channel"},St}
                     end
@@ -56,8 +56,8 @@ handle(St, {leave, Channel}) ->
 
 % Sending message (from GUI, to channel)
 handle(St, {message_send, Channel, Msg}) ->
-    % checks if server is active
-    case lists:member(list_to_atom(Channel), registered()) of
+    % checks if channel is active
+    case server:findAtom(list_to_atom(Channel), registered()) of
             true ->
                 try Result = genserver:request(list_to_atom(Channel),{message_send, Channel, Msg, St#client_st.nick, self()}),
                     case Result of
@@ -77,7 +77,7 @@ handle(St, {message_send, Channel, Msg}) ->
 % Change nick (no check, local only)
 handle(St, {nick, NewNick}) ->
     % checks if server is active
-    case lists:member(St#client_st.server, registered()) of
+    case server:findAtom(St#client_st.server, registered()) of
         true ->
             try Result = genserver:request(St#client_st.server,{nick, St#client_st.nick, NewNick}),
                 case Result of
