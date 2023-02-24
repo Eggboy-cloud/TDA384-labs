@@ -125,7 +125,8 @@ public class ForkJoinSolver
                 }
             }
         }
-        // all nodes explored, no goal found
-        return null;
+        return this.join();
+        
+        
     }
 }
