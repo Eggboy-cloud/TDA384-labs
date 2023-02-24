@@ -105,10 +105,10 @@ public class ForkJoinSolver
                 // mark node as visited
                 visited.add(current);
                 while(!frontier.empty()) {
-                    current = frontier.pop();
-                    if(!visited.contains(current)) {
+                    int forked = frontier.pop();
+                    if(!visited.contains(forked)) {
                         ForkJoinSolver fork = new ForkJoinSolver(maze, 0);  // maybe change param forkAfter to other than 0
-                        fork.start = current;
+                        fork.start = forked;
                         fork.visited = visited;
                         fork.fork();
                     }
