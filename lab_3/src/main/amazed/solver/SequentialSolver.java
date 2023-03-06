@@ -169,9 +169,6 @@ public class SequentialSolver
     protected List<Integer> pathFromTo(int from, int to) {
         List<Integer> path = new LinkedList<>();
         Integer current = to;
-        System.out.println(this.predecessor);
-        System.out.println("From " + from);
-        System.out.println("To " + to);
         while (current != from) {
             path.add(current);
             current = predecessor.get(current);

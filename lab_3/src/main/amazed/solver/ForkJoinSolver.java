@@ -46,7 +46,6 @@ public class ForkJoinSolver
      * search.
      */
     protected static ConcurrentSkipListSet<Integer> visited = new ConcurrentSkipListSet<>();
-
     protected int startPos;
     protected List<ForkJoinSolver> players = new ArrayList<>();
     protected AtomicBoolean found = new AtomicBoolean();
@@ -104,6 +103,8 @@ public class ForkJoinSolver
     private List<Integer> parallelSearch()
     {
         int player = maze.newPlayer(startPos);
+        if(!visited.contains(startPos));
+            visited.add(startPos);
         // start with start node
         frontier.push(startPos);
         // as long as not all nodes have been processed
@@ -121,7 +122,6 @@ public class ForkJoinSolver
             // if current node has not been visited yet
                 // move player to current node
                 maze.move(player, current);
-                
                 int fstVal = 0;
                 // for every node nb adjacent to current
                 for (int nb: maze.neighbors(current)) {
@@ -136,6 +136,7 @@ public class ForkJoinSolver
                         else {                
                             ForkJoinSolver fork = new ForkJoinSolver(maze, found, predecessor, nb, start);
                             players.add(fork);
+                            fork.visited = visited;
                             fork.fork();
                         } 
                     }   
