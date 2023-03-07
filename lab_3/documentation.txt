@@ -1,0 +1,7 @@
+For our solution we have chosen to split at every point there are 2 or more neighbours for the current node.
+This means we do not use forkAfter at all.
+When we iterate over all the neighbours for a given node we first assign one neighbour for the current player 
+and then fork the remaining neighbours as new in stances of ForkJoinSolver.
+If a player finds the goal it returns the path by using the predecessor map.
+If a player cant find the goal it will try to return the results of its forks if one of them have found the goal.
+When one player have found the goal all other players will stop and try to return their forks

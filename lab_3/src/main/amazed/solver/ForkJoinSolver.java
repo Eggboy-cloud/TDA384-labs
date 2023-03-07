@@ -122,7 +122,6 @@ public class ForkJoinSolver
             // if current node has not been visited yet
                 // move player to current node
                 maze.move(player, current);
-                int fstVal = 0;
                 // for every node nb adjacent to current
                 for (int nb: maze.neighbors(current)) {
                     // add nb to the nodes to be processed
@@ -136,13 +135,10 @@ public class ForkJoinSolver
                         else {                
                             ForkJoinSolver fork = new ForkJoinSolver(maze, found, predecessor, nb, start);
                             players.add(fork);
-                            fork.visited = visited;
                             fork.fork();
                         } 
                     }   
                 }
-                if(fstVal != 0)
-                    frontier.push(fstVal);
                 first = true;
                 
         }
