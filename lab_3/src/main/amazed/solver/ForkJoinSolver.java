@@ -119,31 +119,33 @@ public class ForkJoinSolver
                 // search finished: reconstruct and return path
                 return pathFromTo(start, current);
             }
-            // if current node has not been visited yet
-                // move player to current node
-                maze.move(player, current);
-                // for every node nb adjacent to current
-                for (int nb: maze.neighbors(current)) {
-                    // add nb to the nodes to be processed
-                    if(!visited.contains(nb)) {
-                        visited.add(nb);
-                        predecessor.put(nb, current);
-                        if(first) {
-                            frontier.push(nb);
-                            first = false;
-                        }
-                        else {                
-                            ForkJoinSolver fork = new ForkJoinSolver(maze, found, predecessor, nb, start);
-                            players.add(fork);
-                            fork.fork();
-                        } 
-                    }   
-                }
-                first = true;
+            // move player to current node
+            maze.move(player, current);
+            // for every node nb adjacent to current
+            for (int nb: maze.neighbors(current)) {
+                // add nb to the nodes to be processed
+                if(!visited.contains(nb)) {
+                    visited.add(nb);
+                    predecessor.put(nb, current);
+                    //first neighbour goes to current player
+                    if(first) {
+                        frontier.push(nb);
+                        first = false;
+                    }
+                    else {                
+                        //remaining neighbours goes to new instances that forks from this player
+                        ForkJoinSolver fork = new ForkJoinSolver(maze, found, predecessor, nb, start);
+                        players.add(fork);
+                        fork.fork();
+                    } 
+                }   
+            }
+            first = true;
                 
         }
         return joinPlayers();
     }
+    //joins all the forks to this instance of ForkJoinSolver
     private List<Integer> joinPlayers() {
         for (ForkJoinSolver fork : players) {
             List<Integer> result = fork.join();
